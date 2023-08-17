@@ -7,4 +7,8 @@ import Interpolations: interpolate, Linear, Gridded
 include("Modesolver.jl")
 include("Mode.jl")
 
+export VectorialModesolver
+export assemble
+export solve
+
 end # module VectorModesolver

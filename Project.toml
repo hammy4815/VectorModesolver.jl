@@ -1,0 +1,9 @@
+name = "VectorModesolver"
+uuid = "8c544392-5fd9-4640-bea4-e12b3d59d9d1"
+authors = ["Ian Hammond <hammy4815@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

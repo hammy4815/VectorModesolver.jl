@@ -30,13 +30,13 @@ function assemble(ms::VectorialModesolver)
 
     # Loop through all points
     for i ∈ 1:nx
-        for j ∈ 1:nx # Tridiagonal
+        for j ∈ 1:ny # Tridiagonal
 
             # Get ϵ, nesw
-            n = diffy[i+1]
-            s = diffy[i]
-            e = diffx[j+1]
-            w = diffx[j]
+            n = diffy[j+1]
+            s = diffy[j]
+            e = diffx[i+1]
+            w = diffx[i]
             ϵxx1::Float64, ϵxy1::Float64, ϵyx1::Float64, ϵyy1::Float64, ϵzz1::Float64 = ms.ϵ(xc[i], yc[j+1])
             ϵxx2::Float64, ϵxy2::Float64, ϵyx2::Float64, ϵyy2::Float64, ϵzz2::Float64 = ms.ϵ(xc[i], yc[j])
             ϵxx3::Float64, ϵxy3::Float64, ϵyx3::Float64, ϵyy3::Float64, ϵzz3::Float64 = ms.ϵ(xc[i+1], yc[j])
@@ -226,7 +226,7 @@ function assemble(ms::VectorialModesolver)
             ) / (n + s)
 
             # North boundary
-            if j == ny - 1
+            if j == ny
                 axxs += ms.boundary[1] * axxn
                 axxse += ms.boundary[1] * axxne
                 axxsw += ms.boundary[1] * axxnw
@@ -258,7 +258,7 @@ function assemble(ms::VectorialModesolver)
             end
 
             # East boundary
-            if i == nx - 1
+            if i == nx
                 axxw += ms.boundary[3] * axxe
                 axxnw += ms.boundary[3] * axxne
                 axxsw += ms.boundary[3] * axxse
@@ -300,17 +300,18 @@ function assemble(ms::VectorialModesolver)
             A[ix+nn, iy]    = ayxp
             A[ix+nn, iy+nn] = ayyp
 
-            # Top bottom
-            if (j < ny)
-                # North
-                ix = (i - 1) * ny + j + 1 # n
-                iy = (i - 1) * ny + j     # s
+            # North
+            if (j > 1)
+                ix = (i - 1) * ny + j       # n
+                iy = (i - 1) * ny + j - 1   # s
                 A[ix, iy]       = axxs
                 A[ix, iy+nn]    = axys
                 A[ix+nn, iy]    = ayxs
                 A[ix+nn, iy+nn] = ayys
+            end
 
-                # South
+            # South
+            if (j < ny)
                 ix = (i - 1) * ny + j     # s
                 iy = (i - 1) * ny + j + 1 # n
                 A[ix, iy]       = axxn
@@ -319,54 +320,60 @@ function assemble(ms::VectorialModesolver)
                 A[ix+nn, iy+nn] = ayyn
             end
 
-            # Sides
-            if (i < nx)
-                # East
-                ix = (i - 1 + 1) * ny + j # e
-                iy = (i - 1) * ny + j     # w
+            # East
+            if (i > 1)
+                ix = (i - 1) * ny + j       # e
+                iy = (i - 1 - 1) * ny + j   # w
                 A[ix, iy]       = axxw
                 A[ix, iy+nn]    = axyw
                 A[ix+nn, iy]    = ayxw
                 A[ix+nn, iy+nn] = ayyw
+            end
 
-                # West
-                ix = (i - 1) * ny + j     # w
-                iy = (i - 1 + 1) * ny + j # e
+            # West
+            if (i < nx)
+                ix = (i - 1) * ny + j         # w
+                iy = (i - 1 + 1) * ny + j     # e
                 A[ix, iy]       = axxe
                 A[ix, iy+nn]    = axye
                 A[ix+nn, iy]    = ayxe
                 A[ix+nn, iy+nn] = ayye
             end
 
-            # Corners
-            if (j < ny && i < nx)
-                # North-East
-                ix = (i - 1 + 1) * ny + j + 1  # ne
-                iy = (i - 1) * ny + j          # sw
+            # North-East
+            if (i > 1 && j > 1)
+                ix = (i - 1) * ny + j          # ne
+                iy = (i - 1 - 1) * ny + j - 1  # sw
                 A[ix, iy]       = axxsw
                 A[ix, iy+nn]    = axysw
                 A[ix+nn, iy]    = ayxsw
                 A[ix+nn, iy+nn] = ayysw
+            end
 
-                # South-East
-                ix = (i - 1 + 1) * ny + j      # se
-                iy = (i - 1) * ny + j + 1      # nw
+            # South-East
+            if (j < ny && i > 1)
+                ix = (i - 1) * ny + j          # se
+                iy = (i - 1 - 1) * ny + j + 1  # nw
                 A[ix, iy]       = axxnw
                 A[ix, iy+nn]    = axynw
                 A[ix+nn, iy]    = ayxnw
                 A[ix+nn, iy+nn] = ayynw
+            end
 
-                # South-West
+            # South-West
+            if (j < ny && i < nx)
                 ix = (i - 1) * ny + j          # sw
                 iy = (i - 1 + 1) * ny + j + 1  # ne
                 A[ix, iy]       = axxne
                 A[ix, iy+nn]    = axyne
                 A[ix+nn, iy]    = ayxne
                 A[ix+nn, iy+nn] = ayyne
+            end
 
-                # North-West
-                ix = (i - 1) * ny + j + 1      # nw
-                iy = (i - 1 + 1) * ny + j      # se
+            # North-West
+            if (j > 1 && i < nx)
+                ix = (i - 1) * ny + j          # nw
+                iy = (i - 1 + 1) * ny + j - 1  # se
                 A[ix, iy]       = axxse
                 A[ix, iy+nn]    = axyse
                 A[ix+nn, iy]    = ayxse
@@ -385,8 +392,8 @@ function getHz(Hx, Hy, x, y, β)
     diffy = y[2:end] .- y[1:end-1]
 
     # Get field
-    for (i, dx) in enumerate(diffx)
-        for (j, dy) in enumerate(diffy)
+    for (j, dx) in enumerate(diffx)
+        for (i, dy) in enumerate(diffy)
             Hz[i, j] = (
                 (Hx[i+1, j+1] + Hx[i, j+1] - Hx[i+1, j] - Hx[i, j]) / (2 * dx) + # ∂Hx/∂x
                 (Hy[i+1, j+1] + Hy[i+1, j] - Hy[i, j+1] - Hy[i, j]) / (2 * dy)   # ∂Hy/∂y
@@ -397,12 +404,12 @@ function getHz(Hx, Hy, x, y, β)
     # Interpolate field
     xc = 0.5 .* (x[2:end] .+ x[1:end-1])
     yc = 0.5 .* (y[2:end] .+ y[1:end-1])
-    itp = interpolate((xc, yc), Hz, Gridded(Linear()))
+    itp = interpolate((yc, xc), Hz, Gridded(Linear()))
     etpf = extrapolate(itp, Flat())
     itpHz = zeros(ComplexF64, (size(Hx,1), size(Hx,2)))
-    for (i, xv) in enumerate(x)
-        for (j, yv) in enumerate(y)
-            itpHz[i, j] = etpf(xv, yv)
+    for (j, xv) in enumerate(x)
+        for (i, yv) in enumerate(y)
+            itpHz[i, j] = etpf(yv, xv)
         end
     end
 
@@ -422,10 +429,10 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
     # Dx = 1 / (jω) * (∂yHz - ∂zHy) = [∂yHz / (jω)] + (β/ω Hy) 
     # Dy = 1 / (jω) * (∂zHx - ∂xHz) = - [∂zHx / (jω)] - (β/ω Hx)
     # Dz = 1 / (jω) * (∂xHy - ∂yHx) = [∂xHy / (jω)] - [∂yHx / (jω)]
-    for (i, dx) in enumerate(diffx)
-        for (j, dy) in enumerate(diffy)
+    for (j, dx) in enumerate(diffx)
+        for (i, dy) in enumerate(diffy)
             # Get ϵ
-            xc, yc = (x[i] + x[i+1]) / 2, (y[j] + y[j+1]) / 2
+            xc, yc = (x[j] + x[j+1]) / 2, (y[i] + y[i+1]) / 2
             ϵxx, ϵxy, ϵyx, ϵyy, ϵzz = ϵ(xc, yc)
             detϵ = ϵxx * ϵyy - ϵxy * ϵyx
 
@@ -439,7 +446,7 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
             Dy = (
                 - (Hx[i, j] + Hx[i, j+1] + Hx[i+1, j] + Hx[i+1, j+1]) 
                 * (0.25 * β/ω)       # -∂Hx/∂z
-                - (Hz[i+1, j] + Hz[i+1, j+1] - Hz[i, j+1] - Hz[i, j]) 
+                - (Hz[i+1, j+1] + Hz[i, j+1] - Hz[i+1, j] - Hz[i, j]) 
                 / (2im * ω * dx)    # ∂Hz/∂x
             )
             Dz = (
@@ -459,30 +466,27 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
     # Interpolate Fields
     xc = 0.5 .* (x[2:end] .+ x[1:end-1])
     yc = 0.5 .* (y[2:end] .+ y[1:end-1])
-    itpEx = interpolate((xc, yc), Ex, Gridded(Linear()))
+    itpEx = interpolate((yc, xc), Ex, Gridded(Linear()))
     etpEx = extrapolate(itpEx, Flat())
-    itpEy = interpolate((xc, yc), Ey, Gridded(Linear()))
+    itpEy = interpolate((yc, xc), Ey, Gridded(Linear()))
     etpEy = extrapolate(itpEy, Flat())
-    itpEz = interpolate((xc, yc), Ez, Gridded(Linear()))
+    itpEz = interpolate((yc, xc), Ez, Gridded(Linear()))
     etpEz = extrapolate(itpEz, Flat())
     retEx = zeros(ComplexF64, (size(Ex,1)+1, size(Ex,2)+1))
     retEy = zeros(ComplexF64, (size(Ey,1)+1, size(Ey,2)+1))
     retEz = zeros(ComplexF64, (size(Ez,1)+1, size(Ez,2)+1))
-    for (i, xv) in enumerate(x)
-        for (j, yv) in enumerate(y)
-            retEx[i, j] = etpEx(xv, yv)
-            retEy[i, j] = etpEy(xv, yv)
-            retEz[i, j] = etpEz(xv, yv)
+    for (j, xv) in enumerate(x)
+        for (i, yv) in enumerate(y)
+            retEx[i, j] = etpEx(yv, xv)
+            retEy[i, j] = etpEy(yv, xv)
+            retEz[i, j] = etpEz(yv, xv)
         end
     end
 
     return retEx, retEy, retEz
 end
 
-function solve(ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sigma=nothing)
-
-    # Get matrix
-    A = assemble(ms)
+function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sigma=nothing)
 
     # Solve eigenvalues
     ncv = ifelse(isnothing(ncv), 10*nev, ncv)
@@ -500,8 +504,8 @@ function solve(ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sig
     for (i, β²) in enumerate(β²s)
 
         # Extract Hx, Hy
-        Hx = reshape(ϕs[1:nx*ny, i], (nx, ny))
-        Hy = reshape(ϕs[nx*ny+1:end, i], (nx, ny))
+        Hx = reshape(ϕs[1:nx*ny, i], (ny, nx))
+        Hy = reshape(ϕs[nx*ny+1:end, i], (ny, nx))
 
         # Get Hz, neff, Ex, Ey, Ez
         β = √(β²)
@@ -518,3 +522,6 @@ function solve(ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sig
 
     return modes
 end
+
+solve(ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sigma=nothing) = 
+    solve(assemble(ms), ms, nev, tol, ncv, sigma)

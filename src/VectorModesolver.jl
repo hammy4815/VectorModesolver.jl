@@ -1,7 +1,7 @@
 module VectorModesolver
 
 import Arpack: eigs 
-import SparseArrays: spzeros
+import SparseArrays: spzeros, SparseMatrixCSC
 import Interpolations: interpolate, Linear, Gridded, extrapolate, Flat
 
 include("Modesolver.jl")

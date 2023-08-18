@@ -10,5 +10,6 @@ include("Mode.jl")
 export VectorialModesolver
 export assemble
 export solve
+export ϵtype
 
 end # module VectorModesolver

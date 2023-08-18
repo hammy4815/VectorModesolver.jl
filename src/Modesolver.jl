@@ -1,44 +1,46 @@
-struct VectorialModesolver
-    λ::Float64
-    x::Array{Float64}
-    y::Array{Float64}
-    boundary::Tuple{Int,Int,Int,Int}
-    ϵ
-    complexϵ::Bool
-
-    VectorialModesolver(λ::Float64, x::Array{Float64}, y::Array{Float64}, boundary::Tuple{Int,Int,Int,Int}, ϵ, complexϵ::Bool) = new(λ, x, y, boundary, ϵ, complexϵ)
+struct ϵtype <: Function
 end
 
-
-VectorialModesolver(λ::Float64, x::Array{Float64}, y::Array{Float64}, boundary::Tuple{Int,Int,Int,Int}, ϵ) = VectorialModesolver(λ, x, y, boundary, ϵ, false)
+struct VectorialModesolver
+    λ::Float64
+    x::Vector{Float64}
+    y::Vector{Float64}
+    boundary::Tuple{Int,Int,Int,Int}
+    ϵ::ϵtype
+end
 
 function assemble(ms::VectorialModesolver)
 
     # Initialize matrix and vectors
     λ = ms.λ
-    k = ω = 2π / λ
-    x, y = ms.x, ms.y
-    nx, ny = length(x), length(y)
-    datatype = ms.complexϵ ? ComplexF64 : Float64
-    A = spzeros(datatype, 2 * nx * ny, 2 * nx * ny)
-    diffx = x[2:end] .- x[1:end-1]
-    diffx = reshape(vcat(diffx[1], diffx, diffx[end]), :, 1)
-    diffy = y[2:end] .- y[1:end-1]
-    diffy = reshape(vcat(diffy[1], diffy, diffy[end]), 1, :)
-    xc, yc = (x[1:end-1] + x[2:end]) ./ 2, (y[1:end-1] + y[2:end]) ./ 2
-    xc = reshape(vcat(xc[1], xc, xc[end]), :, 1)
-    yc = reshape(vcat(yc[1], yc, yc[end]), 1, :)
+    k = 2π / λ
+    x = ms.x
+    y = ms.y
+    nx = length(x)
+    ny = length(y)
+    A = spzeros(Float64, 2 * nx * ny, 2 * nx * ny)
+    diffx::Vector{Float64} = x[2:end] .- x[1:end-1]
+    diffy::Vector{Float64} = y[2:end] .- y[1:end-1]
+    diffx = reshape(vcat(diffx[1], diffx, diffx[end]), :)
+    diffy = reshape(vcat(diffy[1], diffy, diffy[end]), :)
+    xc::Vector{Float64} = (x[1:end-1] + x[2:end]) ./ 2
+    yc::Vector{Float64} = (y[1:end-1] + y[2:end]) ./ 2
+    xc = reshape(vcat(xc[1], xc, xc[end]), :)
+    yc = reshape(vcat(yc[1], yc, yc[end]), :)
 
     # Loop through all points
     for i ∈ 1:nx
         for j ∈ 1:nx # Tridiagonal
 
             # Get ϵ, nesw
-            n, s, e, w = (diffy[i+1], diffy[i], diffx[j+1], diffx[j])
-            ϵxx1, ϵxy1, ϵyx1, ϵyy1, ϵzz1 = ms.ϵ(xc[i], yc[j+1])
-            ϵxx2, ϵxy2, ϵyx2, ϵyy2, ϵzz2 = ms.ϵ(xc[i], yc[j])
-            ϵxx3, ϵxy3, ϵyx3, ϵyy3, ϵzz3 = ms.ϵ(xc[i+1], yc[j])
-            ϵxx4, ϵxy4, ϵyx4, ϵyy4, ϵzz4 = ms.ϵ(xc[i+1], yc[j+1])
+            n = diffy[i+1]
+            s = diffy[i]
+            e = diffx[j+1]
+            w = diffx[j]
+            ϵxx1::Float64, ϵxy1::Float64, ϵyx1::Float64, ϵyy1::Float64, ϵzz1::Float64 = ms.ϵ(xc[i], yc[j+1])
+            ϵxx2::Float64, ϵxy2::Float64, ϵyx2::Float64, ϵyy2::Float64, ϵzz2::Float64 = ms.ϵ(xc[i], yc[j])
+            ϵxx3::Float64, ϵxy3::Float64, ϵyx3::Float64, ϵyy3::Float64, ϵzz3::Float64 = ms.ϵ(xc[i+1], yc[j])
+            ϵxx4::Float64, ϵxy4::Float64, ϵyx4::Float64, ϵyy4::Float64, ϵzz4::Float64 = ms.ϵ(xc[i+1], yc[j+1])
             ns21 = n * ϵyy2 + s * ϵyy1
             ns34 = n * ϵyy3 + s * ϵyy4
             ew14 = e * ϵxx1 + w * ϵxx4

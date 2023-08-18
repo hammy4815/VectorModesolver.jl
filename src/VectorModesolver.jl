@@ -2,7 +2,7 @@ module VectorModesolver
 
 import Arpack: eigs 
 import SparseArrays: spzeros
-import Interpolations: interpolate, Linear, Gridded
+import Interpolations: interpolate, Linear, Gridded, extrapolate, Flat
 
 include("Modesolver.jl")
 include("Mode.jl")

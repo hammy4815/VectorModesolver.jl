@@ -1,10 +1,10 @@
 struct Mode
     λ::Float64
     neff::Float64
-    Ex::Vector{ComplexF64}
-    Ey::Vector{ComplexF64}
-    Ez::Vector{ComplexF64}
-    Hx::Vector{ComplexF64}
-    Hy::Vector{ComplexF64}
-    Hz::Vector{ComplexF64}
+    Ex::Array{ComplexF64}
+    Ey::Array{ComplexF64}
+    Ez::Array{ComplexF64}
+    Hx::Array{ComplexF64}
+    Hy::Array{ComplexF64}
+    Hz::Array{ComplexF64}
 end

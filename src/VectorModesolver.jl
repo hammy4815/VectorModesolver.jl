@@ -3,13 +3,13 @@ module VectorModesolver
 import Arpack: eigs 
 import SparseArrays: spzeros, SparseMatrixCSC
 import Interpolations: interpolate, Linear, Gridded, extrapolate, Flat
+using Parameters
+using Revise
+
+export VectorialModesolver, assemble, solve, ϵtype
 
 include("Modesolver.jl")
 include("Mode.jl")
-
-export VectorialModesolver
-export assemble
-export solve
-export ϵtype
+include("Visualization.jl")
 
 end # module VectorModesolver

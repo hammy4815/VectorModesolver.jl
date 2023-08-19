@@ -1,7 +1,7 @@
 struct ϵtype <: Function
 end
 
-struct VectorialModesolver
+@with_kw struct VectorialModesolver
     λ::Float64
     x::Vector{Float64}
     y::Vector{Float64}
@@ -514,7 +514,20 @@ function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float
         Ex, Ey, Ez = getE(Hx, Hy, Hz, ms.x, ms.y, β, ω, ms.ϵ)
 
         # Push Field
-        push!(modes, Mode(ms.λ, neff, Ex, Ey, Ez, Hx, Hy, Hz))
+        push!(modes, 
+            Mode( 
+                λ = ms.λ, 
+                neff = neff, 
+                x = ms.x, 
+                y = ms.y, 
+                Ex = Ex, 
+                Ey = Ey, 
+                Ez = Ez, 
+                Hx = Hx, 
+                Hy = Hy, 
+                Hz = Hz,
+                )
+            )
     end
 
     # Sort modes

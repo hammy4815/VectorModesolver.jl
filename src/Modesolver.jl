@@ -1,4 +1,14 @@
-struct ϵtype <: Function
+@with_kw struct Material{T<Number}
+    ε_xx::T
+    ε_xy::T
+    ε_yx::T
+    ε_yy::T
+    ε_zz::T
+end
+
+@with_kw struct Geometry
+    shapes::AbstractVector{<:Shape}
+    materials::AbstractVector{Material}
 end
 
 @with_kw struct VectorialModesolver
@@ -6,9 +16,32 @@ end
     x::Vector{Float64}
     y::Vector{Float64}
     boundary::Tuple{Int,Int,Int,Int}
-    ϵ::ϵtype
+    ϵ::Union{Function, AbstractVector{Geometry}}
 end
 
+"""
+    get_ε(ε::Function, point::AbstractVector{<:Real})
+
+TBW
+"""
+get_ε(ε::Function, x::Real, y::Real) = ε(x,y)
+
+"""
+    get_ε(ε::AbstractVector{<:Shape}, point::AbstractVector{<:Real})
+
+TBW
+"""
+function get_ε(ε::AbstractVector{Geometry}, x::Real, y::Real)
+    idx = findfirst((x,y), ε.shapes)
+    mat = ε.shapes[idx]
+    return (mat.ε_xx, mat.ε_xy, mat.ε_yx, mat.ε_yy, mat.ε_zz)
+end
+
+"""
+    assemble(ms::VectorialModesolver)
+
+TBW
+"""
 function assemble(ms::VectorialModesolver)
 
     # Initialize matrix and vectors
@@ -37,10 +70,12 @@ function assemble(ms::VectorialModesolver)
             s = diffy[j]
             e = diffx[i+1]
             w = diffx[i]
-            ϵxx1::Float64, ϵxy1::Float64, ϵyx1::Float64, ϵyy1::Float64, ϵzz1::Float64 = ms.ϵ(xc[i], yc[j+1])
-            ϵxx2::Float64, ϵxy2::Float64, ϵyx2::Float64, ϵyy2::Float64, ϵzz2::Float64 = ms.ϵ(xc[i], yc[j])
-            ϵxx3::Float64, ϵxy3::Float64, ϵyx3::Float64, ϵyy3::Float64, ϵzz3::Float64 = ms.ϵ(xc[i+1], yc[j])
-            ϵxx4::Float64, ϵxy4::Float64, ϵyx4::Float64, ϵyy4::Float64, ϵzz4::Float64 = ms.ϵ(xc[i+1], yc[j+1])
+            
+            ϵxx1::Float64, ϵxy1::Float64, ϵyx1::Float64, ϵyy1::Float64, ϵzz1::Float64 = get_ε(ms.ϵ, xc[i], yc[j+1])
+            ϵxx2::Float64, ϵxy2::Float64, ϵyx2::Float64, ϵyy2::Float64, ϵzz2::Float64 = get_ε(ms.ϵ, xc[i], yc[j])
+            ϵxx3::Float64, ϵxy3::Float64, ϵyx3::Float64, ϵyy3::Float64, ϵzz3::Float64 = get_ε(ms.ϵ, xc[i+1], yc[j])
+            ϵxx4::Float64, ϵxy4::Float64, ϵyx4::Float64, ϵyy4::Float64, ϵzz4::Float64 = get_ε(ms.ϵ, xc[i+1], yc[j+1])
+
             ns21 = n * ϵyy2 + s * ϵyy1
             ns34 = n * ϵyy3 + s * ϵyy4
             ew14 = e * ϵxx1 + w * ϵxx4

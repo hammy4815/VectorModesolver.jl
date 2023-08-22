@@ -1,6 +1,6 @@
 using VectorModesolver
 
-function (ϵ::ϵtype)(x::Float64, y::Float64) 
+function (ε::εtype)(x::Float64, y::Float64) 
 
     if (0.5 < x < 2.0) && (0.90 < y < 1.5)
         return (4.0, 0.0, 0.0, 4.0, 4.0)
@@ -11,14 +11,14 @@ end
 
 function main()
     # Solve Modes
-    ϵ = ϵtype()
+    ε = εtype()
     λ = 1.55
     x = [i for i in 0:0.03:2.5]
     y = [i for i in 0:0.05:2.5]
     neigs = 3
     tol = 1e-8
     boundary = (0,0,0,0)
-    solver = VectorialModesolver(λ,x,y,boundary,ϵ)
+    solver = VectorialModesolver(λ,x,y,boundary,ε)
     modes = solve(solver, neigs, tol)
 
     # Ensure Modes are orthonormal

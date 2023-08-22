@@ -6,7 +6,7 @@ import Interpolations: interpolate, Linear, Gridded, extrapolate, Flat
 using Parameters
 using Revise
 
-export VectorialModesolver, assemble, solve, ϵtype
+export VectorialModesolver, assemble, solve, εtype
 
 include("Modesolver.jl")
 include("Mode.jl")

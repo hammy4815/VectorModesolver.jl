@@ -27,8 +27,8 @@ function getApy(λ,x,y,epsfunc)
 end
 
 # Define the domain
-# Should return a tuple with (ϵxx, ϵxy, ϵyx, ϵyy, ϵzz)
-function (ϵ::ϵtype)(x::Float64, y::Float64) 
+# Should return a tuple with (εxx, εxy, εyx, εyy, εzz)
+function (ε::εtype)(x::Float64, y::Float64) 
 
     if (0.75 < x < 1.75) && (0.95 < y < 1.55)
         return (4.0, 0.0, 0.0, 4.0, 4.0)
@@ -36,17 +36,17 @@ function (ϵ::ϵtype)(x::Float64, y::Float64)
 
     return (1.0, 0.0, 0.0, 1.0, 1.0)
 end
-ϵ = ϵtype()
+ε = εtype()
 
 function epsfunc(x_, y_)
     eps = Numpy.zeros((length(x_), length(y_), 5))
     for (i, x) in enumerate(x_)
         for (j, y) in enumerate(y_)
-            eps[i,j,1] = ϵ(x,y)[1]
-            eps[i,j,2] = ϵ(x,y)[2]
-            eps[i,j,3] = ϵ(x,y)[3]
-            eps[i,j,4] = ϵ(x,y)[4]
-            eps[i,j,5] = ϵ(x,y)[5]
+            eps[i,j,1] = ε(x,y)[1]
+            eps[i,j,2] = ε(x,y)[2]
+            eps[i,j,3] = ε(x,y)[3]
+            eps[i,j,4] = ε(x,y)[4]
+            eps[i,j,5] = ε(x,y)[5]
         end
     end
     return eps
@@ -85,7 +85,7 @@ tol = 1e-8
 boundary = (0,0,0,0)
 
 # Define the modesolver
-solver = VectorialModesolver(λ,x,y,boundary,ϵ)
+solver = VectorialModesolver(λ,x,y,boundary,ε)
 
 # # Solve for the modes
 # A = assemble(solver)
@@ -102,7 +102,7 @@ solver = VectorialModesolver(λ,x,y,boundary,ϵ)
 #     end
 # end
 # a = assemble(solver)
-# @code_warntype optimize=true ϵ(1.0,1.0)
+# @code_warntype optimize=true ε(1.0,1.0)
 
 modes = solve(solver, neigs, tol)
 # emodes = getempymodes(λ,x,y,epsfunc,neigs, tol)
@@ -117,7 +117,7 @@ Hy = real.(modes[1].Hy)
 Hz = imag.(modes[1].Hz)
 xx = x * ones(length(y))'
 yy = ones(length(x)) * y'
-eps = ((x,y)->ϵ(x,y)[1]).(xx, yy)
+eps = ((x,y)->ε(x,y)[1]).(xx, yy)
 
 PyPlot.figure(figsize=(16, 6)) # Create a 3x2 layout
 

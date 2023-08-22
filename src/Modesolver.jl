@@ -1,4 +1,4 @@
-struct ϵtype <: Function
+struct εtype <: Function
 end
 
 @with_kw struct VectorialModesolver
@@ -6,7 +6,7 @@ end
     x::Vector{Float64}
     y::Vector{Float64}
     boundary::Tuple{Int,Int,Int,Int}
-    ϵ::ϵtype
+    ε::εtype
 end
 
 function assemble(ms::VectorialModesolver)
@@ -32,80 +32,80 @@ function assemble(ms::VectorialModesolver)
     for i ∈ 1:nx
         for j ∈ 1:ny # Tridiagonal
 
-            # Get ϵ, nesw
+            # Get ε, nesw
             n = diffy[j+1]
             s = diffy[j]
             e = diffx[i+1]
             w = diffx[i]
-            ϵxx1::Float64, ϵxy1::Float64, ϵyx1::Float64, ϵyy1::Float64, ϵzz1::Float64 = ms.ϵ(xc[i], yc[j+1])
-            ϵxx2::Float64, ϵxy2::Float64, ϵyx2::Float64, ϵyy2::Float64, ϵzz2::Float64 = ms.ϵ(xc[i], yc[j])
-            ϵxx3::Float64, ϵxy3::Float64, ϵyx3::Float64, ϵyy3::Float64, ϵzz3::Float64 = ms.ϵ(xc[i+1], yc[j])
-            ϵxx4::Float64, ϵxy4::Float64, ϵyx4::Float64, ϵyy4::Float64, ϵzz4::Float64 = ms.ϵ(xc[i+1], yc[j+1])
-            ns21 = n * ϵyy2 + s * ϵyy1
-            ns34 = n * ϵyy3 + s * ϵyy4
-            ew14 = e * ϵxx1 + w * ϵxx4
-            ew23 = e * ϵxx2 + w * ϵxx3
+            εxx1::Float64, εxy1::Float64, εyx1::Float64, εyy1::Float64, εzz1::Float64 = ms.ε(xc[i], yc[j+1])
+            εxx2::Float64, εxy2::Float64, εyx2::Float64, εyy2::Float64, εzz2::Float64 = ms.ε(xc[i], yc[j])
+            εxx3::Float64, εxy3::Float64, εyx3::Float64, εyy3::Float64, εzz3::Float64 = ms.ε(xc[i+1], yc[j])
+            εxx4::Float64, εxy4::Float64, εyx4::Float64, εyy4::Float64, εzz4::Float64 = ms.ε(xc[i+1], yc[j+1])
+            ns21 = n * εyy2 + s * εyy1
+            ns34 = n * εyy3 + s * εyy4
+            ew14 = e * εxx1 + w * εxx4
+            ew23 = e * εxx2 + w * εxx3
 
             # Eq 21
             axxn = (
-                (2 * ϵyy4 * e - ϵyx4 * n) * (ϵyy3 / ϵzz4) / ns34
-                + (2 * ϵyy1 * w + ϵyx1 * n) * (ϵyy2 / ϵzz1) / ns21
+                (2 * εyy4 * e - εyx4 * n) * (εyy3 / εzz4) / ns34
+                + (2 * εyy1 * w + εyx1 * n) * (εyy2 / εzz1) / ns21
             ) / (n * (e + w))
             # Eq 22
             axxs = (
-                (2 * ϵyy3 * e + ϵyx3 * s) * (ϵyy4 / ϵzz3) / ns34
-                + (2 * ϵyy2 * w - ϵyx2 * s) * (ϵyy1 / ϵzz2) / ns21
+                (2 * εyy3 * e + εyx3 * s) * (εyy4 / εzz3) / ns34
+                + (2 * εyy2 * w - εyx2 * s) * (εyy1 / εzz2) / ns21
             ) / (s * (e + w))
             # Eq 23 transformed
-            ayye = (2 * n * ϵxx4 - e * ϵxy4) * ϵxx1 / ϵzz4 / e / ew14 / (n + s) + (
-                2 * s * ϵxx3 + e * ϵxy3
-            ) * ϵxx2 / ϵzz3 / e / ew23 / (n + s)
+            ayye = (2 * n * εxx4 - e * εxy4) * εxx1 / εzz4 / e / ew14 / (n + s) + (
+                2 * s * εxx3 + e * εxy3
+            ) * εxx2 / εzz3 / e / ew23 / (n + s)
             # Eq 24 transformed
-            ayyw = (2 * ϵxx1 * n + ϵxy1 * w) * ϵxx4 / ϵzz1 / w / ew14 / (n + s) + (
-                2 * ϵxx2 * s - ϵxy2 * w
-            ) * ϵxx3 / ϵzz2 / w / ew23 / (n + s)
+            ayyw = (2 * εxx1 * n + εxy1 * w) * εxx4 / εzz1 / w / ew14 / (n + s) + (
+                2 * εxx2 * s - εxy2 * w
+            ) * εxx3 / εzz2 / w / ew23 / (n + s)
             # Eq 23
             axxe = (
                 2 / (e * (e + w))
-                + (ϵyy4 * ϵyx3 / ϵzz3 - ϵyy3 * ϵyx4 / ϵzz4) / (e + w) / ns34
+                + (εyy4 * εyx3 / εzz3 - εyy3 * εyx4 / εzz4) / (e + w) / ns34
             )
             # Eq 24
             axxw = (
                 2 / (w * (e + w))
-                + (ϵyy2 * ϵyx1 / ϵzz1 - ϵyy1 * ϵyx2 / ϵzz2) / (e + w) / ns21
+                + (εyy2 * εyx1 / εzz1 - εyy1 * εyx2 / εzz2) / (e + w) / ns21
             )
             # Eq 21 transformed
             ayyn = (
                 2 / (n * (n + s))
-                + (ϵxx4 * ϵxy1 / ϵzz1 - ϵxx1 * ϵxy4 / ϵzz4) / (n + s) / ew14
+                + (εxx4 * εxy1 / εzz1 - εxx1 * εxy4 / εzz4) / (n + s) / ew14
             )
             # Eq 22 transformed
             ayys = (
                 2 / (s * (n + s))
-                + (ϵxx2 * ϵxy3 / ϵzz3 - ϵxx3 * ϵxy2 / ϵzz2) / (n + s) / ew23
+                + (εxx2 * εxy3 / εzz3 - εxx3 * εxy2 / εzz2) / (n + s) / ew23
             )
 
             # Eq 25
-            axxne = +ϵyx4 * ϵyy3 / ϵzz4 / (e + w) / ns34
-            axxse = -ϵyx3 * ϵyy4 / ϵzz3 / (e + w) / ns34
+            axxne = +εyx4 * εyy3 / εzz4 / (e + w) / ns34
+            axxse = -εyx3 * εyy4 / εzz3 / (e + w) / ns34
 
             # Eq 26
-            axxnw = -ϵyx1 * ϵyy2 / ϵzz1 / (e + w) / ns21
-            axxsw = +ϵyx2 * ϵyy1 / ϵzz2 / (e + w) / ns21
+            axxnw = -εyx1 * εyy2 / εzz1 / (e + w) / ns21
+            axxsw = +εyx2 * εyy1 / εzz2 / (e + w) / ns21
 
             # Eq 25 transformed
-            ayyne = +ϵxy4 * ϵxx1 / ϵzz4 / (n + s) / ew14
-            ayyse = -ϵxy3 * ϵxx2 / ϵzz3 / (n + s) / ew23
+            ayyne = +εxy4 * εxx1 / εzz4 / (n + s) / ew14
+            ayyse = -εxy3 * εxx2 / εzz3 / (n + s) / ew23
 
             # Eq 26 transformed
-            ayynw = -ϵxy1 * ϵxx4 / ϵzz1 / (n + s) / ew14
-            ayysw = +ϵxy2 * ϵxx3 / ϵzz2 / (n + s) / ew23
+            ayynw = -εxy1 * εxx4 / εzz1 / (n + s) / ew14
+            ayysw = +εxy2 * εxx3 / εzz2 / (n + s) / ew23
 
             # Eq 27
             axxp = (
                 - axxn - axxs - axxe - axxw - axxne - axxse - axxnw - axxsw
                 + k^2 * (n + s)
-                * (ϵyy4 * ϵyy3 * e / ns34 + ϵyy1 * ϵyy2 * w / ns21)
+                * (εyy4 * εyy3 * e / ns34 + εyy1 * εyy2 * w / ns21)
                 / (e + w)
             )
 
@@ -113,116 +113,116 @@ function assemble(ms::VectorialModesolver)
             ayyp = (
                 - ayyn - ayys - ayye - ayyw - ayyne - ayyse - ayynw - ayysw
                 + k^2 * (e + w)
-                * (ϵxx1 * ϵxx4 * n / ew14 + ϵxx2 * ϵxx3 * s / ew23)
+                * (εxx1 * εxx4 * n / ew14 + εxx2 * εxx3 * s / ew23)
                 / (n + s)
             )
 
             # Eq 28
             axyn = (
-                ϵyy3 * ϵyy4 / ϵzz4 / ns34
-                - ϵyy2 * ϵyy1 / ϵzz1 / ns21
-                + s * (ϵyy2 * ϵyy4 - ϵyy1 * ϵyy3) / ns21 / ns34
+                εyy3 * εyy4 / εzz4 / ns34
+                - εyy2 * εyy1 / εzz1 / ns21
+                + s * (εyy2 * εyy4 - εyy1 * εyy3) / ns21 / ns34
             ) / (e + w)
 
             # Eq 29
             axys = (
-                ϵyy1 * ϵyy2 / ϵzz2 / ns21
-                - ϵyy4 * ϵyy3 / ϵzz3 / ns34
-                + n * (ϵyy2 * ϵyy4 - ϵyy1 * ϵyy3) / ns21 / ns34
+                εyy1 * εyy2 / εzz2 / ns21
+                - εyy4 * εyy3 / εzz3 / ns34
+                + n * (εyy2 * εyy4 - εyy1 * εyy3) / ns21 / ns34
             ) / (e + w)
 
             # Eq 28 transformed
             ayxe = (
-                ϵxx1 * ϵxx4 / ϵzz4 / ew14
-                - ϵxx2 * ϵxx3 / ϵzz3 / ew23
-                + w * (ϵxx2 * ϵxx4 - ϵxx1 * ϵxx3) / ew23 / ew14
+                εxx1 * εxx4 / εzz4 / ew14
+                - εxx2 * εxx3 / εzz3 / ew23
+                + w * (εxx2 * εxx4 - εxx1 * εxx3) / ew23 / ew14
             ) / (n + s)
 
             # Eq 29 transformed
             ayxw = (
-                ϵxx3 * ϵxx2 / ϵzz2 / ew23
-                - ϵxx4 * ϵxx1 / ϵzz1 / ew14
-                + e * (ϵxx4 * ϵxx2 - ϵxx1 * ϵxx3) / ew23 / ew14
+                εxx3 * εxx2 / εzz2 / ew23
+                - εxx4 * εxx1 / εzz1 / ew14
+                + e * (εxx4 * εxx2 - εxx1 * εxx3) / ew23 / ew14
             ) / (n + s)
 
             # Eq 30
-            axye = (ϵyy4 * (1 + ϵyy3 / ϵzz4) - ϵyy3 * (1 + ϵyy4 / ϵzz4)) / ns34 / (
+            axye = (εyy4 * (1 + εyy3 / εzz4) - εyy3 * (1 + εyy4 / εzz4)) / ns34 / (
                 e + w
             ) - (
-                2 * ϵyx1 * ϵyy2 / ϵzz1 * n * w / ns21
-                + 2 * ϵyx2 * ϵyy1 / ϵzz2 * s * w / ns21
-                + 2 * ϵyx4 * ϵyy3 / ϵzz4 * n * e / ns34
-                + 2 * ϵyx3 * ϵyy4 / ϵzz3 * s * e / ns34
-                + 2 * ϵyy1 * ϵyy2 * (1.0 / ϵzz1 - 1.0 / ϵzz2) * w^2 / ns21
+                2 * εyx1 * εyy2 / εzz1 * n * w / ns21
+                + 2 * εyx2 * εyy1 / εzz2 * s * w / ns21
+                + 2 * εyx4 * εyy3 / εzz4 * n * e / ns34
+                + 2 * εyx3 * εyy4 / εzz3 * s * e / ns34
+                + 2 * εyy1 * εyy2 * (1.0 / εzz1 - 1.0 / εzz2) * w^2 / ns21
             ) / e / (
                 e + w
             ) ^ 2
 
             # Eq 31
-            axyw = (ϵyy2 * (1 + ϵyy1 / ϵzz2) - ϵyy1 * (1 + ϵyy2 / ϵzz2)) / ns21 / (
+            axyw = (εyy2 * (1 + εyy1 / εzz2) - εyy1 * (1 + εyy2 / εzz2)) / ns21 / (
                 e + w
             ) - (
-                2 * ϵyx1 * ϵyy2 / ϵzz1 * n * e / ns21
-                + 2 * ϵyx2 * ϵyy1 / ϵzz2 * s * e / ns21
-                + 2 * ϵyx4 * ϵyy3 / ϵzz4 * n * w / ns34
-                + 2 * ϵyx3 * ϵyy4 / ϵzz3 * s * w / ns34
-                + 2 * ϵyy3 * ϵyy4 * (1.0 / ϵzz3 - 1.0 / ϵzz4) * e^2 / ns34
+                2 * εyx1 * εyy2 / εzz1 * n * e / ns21
+                + 2 * εyx2 * εyy1 / εzz2 * s * e / ns21
+                + 2 * εyx4 * εyy3 / εzz4 * n * w / ns34
+                + 2 * εyx3 * εyy4 / εzz3 * s * w / ns34
+                + 2 * εyy3 * εyy4 * (1.0 / εzz3 - 1.0 / εzz4) * e^2 / ns34
             ) / w / (
                 e + w
             ) ^ 2
 
             # Eq 30 transformed
-            ayxn = (ϵxx4 * (1 + ϵxx1 / ϵzz4) - ϵxx1 * (1 + ϵxx4 / ϵzz4)) / ew14 / (
+            ayxn = (εxx4 * (1 + εxx1 / εzz4) - εxx1 * (1 + εxx4 / εzz4)) / ew14 / (
                 n + s
             ) - (
-                2 * ϵxy3 * ϵxx2 / ϵzz3 * e * s / ew23
-                + 2 * ϵxy2 * ϵxx3 / ϵzz2 * w * n / ew23
-                + 2 * ϵxy4 * ϵxx1 / ϵzz4 * e * s / ew14
-                + 2 * ϵxy1 * ϵxx4 / ϵzz1 * w * n / ew14
-                + 2 * ϵxx3 * ϵxx2 * (1.0 / ϵzz3 - 1.0 / ϵzz2) * s^2 / ew23
+                2 * εxy3 * εxx2 / εzz3 * e * s / ew23
+                + 2 * εxy2 * εxx3 / εzz2 * w * n / ew23
+                + 2 * εxy4 * εxx1 / εzz4 * e * s / ew14
+                + 2 * εxy1 * εxx4 / εzz1 * w * n / ew14
+                + 2 * εxx3 * εxx2 * (1.0 / εzz3 - 1.0 / εzz2) * s^2 / ew23
             ) / n / (
                 n + s
             ) ^ 2
 
             # Eq 31 transformed
-            ayxs = (ϵxx2 * (1 + ϵxx3 / ϵzz2) - ϵxx3 * (1 + ϵxx2 / ϵzz2)) / ew23 / (
+            ayxs = (εxx2 * (1 + εxx3 / εzz2) - εxx3 * (1 + εxx2 / εzz2)) / ew23 / (
                 n + s
             ) - (
-                2 * ϵxy3 * ϵxx2 / ϵzz3 * e * n / ew23
-                + 2 * ϵxy2 * ϵxx3 / ϵzz2 * w * n / ew23
-                + 2 * ϵxy4 * ϵxx1 / ϵzz4 * e * s / ew14
-                + 2 * ϵxy1 * ϵxx4 / ϵzz1 * w * s / ew14
-                + 2 * ϵxx1 * ϵxx4 * (1.0 / ϵzz1 - 1.0 / ϵzz4) * n^2 / ew14
+                2 * εxy3 * εxx2 / εzz3 * e * n / ew23
+                + 2 * εxy2 * εxx3 / εzz2 * w * n / ew23
+                + 2 * εxy4 * εxx1 / εzz4 * e * s / ew14
+                + 2 * εxy1 * εxx4 / εzz1 * w * s / ew14
+                + 2 * εxx1 * εxx4 * (1.0 / εzz1 - 1.0 / εzz4) * n^2 / ew14
             ) / s / (
                 n + s
             ) ^ 2
 
             # Eq 32
-            axyne = +ϵyy3 * (1 - ϵyy4 / ϵzz4) / (e + w) / ns34
-            axyse = -ϵyy4 * (1 - ϵyy3 / ϵzz3) / (e + w) / ns34
+            axyne = +εyy3 * (1 - εyy4 / εzz4) / (e + w) / ns34
+            axyse = -εyy4 * (1 - εyy3 / εzz3) / (e + w) / ns34
 
             # Eq 33
-            axynw = -ϵyy2 * (1 - ϵyy1 / ϵzz1) / (e + w) / ns21
-            axysw = +ϵyy1 * (1 - ϵyy2 / ϵzz2) / (e + w) / ns21
+            axynw = -εyy2 * (1 - εyy1 / εzz1) / (e + w) / ns21
+            axysw = +εyy1 * (1 - εyy2 / εzz2) / (e + w) / ns21
 
             # Eq 32 transformed
-            ayxne = +ϵxx1 * (1 - ϵxx4 / ϵzz4) / (n + s) / ew14
-            ayxse = -ϵxx2 * (1 - ϵxx3 / ϵzz3) / (n + s) / ew23
+            ayxne = +εxx1 * (1 - εxx4 / εzz4) / (n + s) / ew14
+            ayxse = -εxx2 * (1 - εxx3 / εzz3) / (n + s) / ew23
 
             # Eq 33 transformed
-            ayxnw = -ϵxx4 * (1 - ϵxx1 / ϵzz1) / (n + s) / ew14
-            ayxsw = +ϵxx3 * (1 - ϵxx2 / ϵzz2) / (n + s) / ew23
+            ayxnw = -εxx4 * (1 - εxx1 / εzz1) / (n + s) / ew14
+            ayxsw = +εxx3 * (1 - εxx2 / εzz2) / (n + s) / ew23
 
             # Eq 34
             axyp = -(axyn + axys + axye + axyw + axyne + axyse + axynw + axysw) - k^2 * (
-                w * (n * ϵyx1 * ϵyy2 + s * ϵyx2 * ϵyy1) / ns21
-                + e * (s * ϵyx3 * ϵyy4 + n * ϵyx4 * ϵyy3) / ns34
+                w * (n * εyx1 * εyy2 + s * εyx2 * εyy1) / ns21
+                + e * (s * εyx3 * εyy4 + n * εyx4 * εyy3) / ns34
             ) / (e + w)
 
             # Eq 34 transformed
             ayxp = -(ayxn + ayxs + ayxe + ayxw + ayxne + ayxse + ayxnw + ayxsw) - k^2 * (
-                n * (w * ϵxy1 * ϵxx4 + e * ϵxy4 * ϵxx1) / ew14
-                + s * (w * ϵxy2 * ϵxx3 + e * ϵxy3 * ϵxx2) / ew23
+                n * (w * εxy1 * εxx4 + e * εxy4 * εxx1) / ew14
+                + s * (w * εxy2 * εxx3 + e * εxy3 * εxx2) / ew23
             ) / (n + s)
 
             # North boundary
@@ -416,7 +416,7 @@ function getHz(Hx, Hy, x, y, β)
     return itpHz
 end
 
-function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
+function getE(Hx, Hy, Hz, x, y, β, ω, ε)
 
     # Init Fields
     Ex = zeros(ComplexF64, (size(Hx,1)-1, size(Hx,2)-1))
@@ -431,10 +431,10 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
     # Dz = 1 / (jω) * (∂xHy - ∂yHx) = [∂xHy / (jω)] - [∂yHx / (jω)]
     for (j, dx) in enumerate(diffx)
         for (i, dy) in enumerate(diffy)
-            # Get ϵ
+            # Get ε
             xc, yc = (x[j] + x[j+1]) / 2, (y[i] + y[i+1]) / 2
-            ϵxx, ϵxy, ϵyx, ϵyy, ϵzz = ϵ(xc, yc)
-            detϵ = ϵxx * ϵyy - ϵxy * ϵyx
+            εxx, εxy, εyx, εyy, εzz = ε(xc, yc)
+            detε = εxx * εyy - εxy * εyx
 
             # Build D
             Dx = (
@@ -456,10 +456,10 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
                 / (-2im * ω * dy)    # ∂Hx/∂y
             )
 
-            # Get E = ϵ⁻¹ D
-            Ex[i, j] = (ϵyy * Dx - ϵxy * Dy) / detϵ
-            Ey[i, j] = (ϵxx * Dy - ϵyx * Dx) / detϵ
-            Ez[i, j] = Dz / ϵzz
+            # Get E = ε⁻¹ D
+            Ex[i, j] = (εyy * Dx - εxy * Dy) / detε
+            Ey[i, j] = (εxx * Dy - εyx * Dx) / detε
+            Ez[i, j] = Dz / εzz
         end
     end
 
@@ -511,7 +511,7 @@ function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float
         β = √(β²)
         Hz = getHz(Hx, Hy, ms.x, ms.y, β)
         neff = β / k
-        Ex, Ey, Ez = getE(Hx, Hy, Hz, ms.x, ms.y, β, ω, ms.ϵ)
+        Ex, Ey, Ez = getE(Hx, Hy, Hz, ms.x, ms.y, β, ω, ms.ε)
 
         # Push Field
         push!(modes, 

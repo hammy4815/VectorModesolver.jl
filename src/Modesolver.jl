@@ -486,7 +486,7 @@ function getE(Hx, Hy, Hz, x, y, β, ω, ϵ)
     return retEx, retEy, retEz
 end
 
-function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sigma=nothing)
+function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float64, ncv=nothing, sigma=nothing, normalize=true)
 
     # Solve eigenvalues
     ncv = ifelse(isnothing(ncv), 10*nev, ncv)
@@ -532,6 +532,11 @@ function solve(A::SparseMatrixCSC, ms::VectorialModesolver, nev::Int, tol::Float
 
     # Sort modes
     sort!(modes, by=m->-m.neff)
+    if normalize
+        for mode in modes
+            normalize!(mode)
+        end
+    end
 
     return modes
 end

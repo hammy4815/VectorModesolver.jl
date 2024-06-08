@@ -12,3 +12,13 @@ PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[compat]
+Arpack = "0.5"
+CairoMakie = "0.12"
+Interpolations = "0.15"
+Parameters = "0.12"
+PyCall = "1.96"
+PyPlot = "2.11"
+Revise = "3.5"
+SparseArrays = "1.10"

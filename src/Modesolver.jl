@@ -1,12 +1,10 @@
-struct εtype <: Function
-end
 
-@with_kw struct VectorialModesolver
+@with_kw struct VectorialModesolver{F}
     λ::Float64
     x::Vector{Float64}
     y::Vector{Float64}
     boundary::Tuple{Int,Int,Int,Int}
-    ε::εtype
+    ε::F
 end
 
 function assemble(ms::VectorialModesolver)
